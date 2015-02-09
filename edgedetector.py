@@ -26,42 +26,47 @@ def edgedetection(image, threshold = None):
       newimage = Image.new('RGB', (width, height))
    for x in xrange(0, width):
       for y in xrange(0, height):
-         nbh = neighborhood(x, y)
-         g = []
+         nbh = neighborhood(x, y) #Gets the pixel neighborhood
+         g = [] # A list for the gradients
          i=0
+         #Convolution
          for m in masks:
             g.append(0)
             j=0
             for n in m:
                w, h = nbh[j]
                if w >= 0 and h >= 0 and w < width-1 and h < height-1:
+                  #Gets a value from RGB
                   value = image.getpixel(nbh[j])
                   gray = (value[0]+value[1]+value[2])/3
-                  g[i] += gray*n
+                  g[i] += gray*n 
                j+=1
             i+=1
-         mag = max(g)
+         mag = max(g) #Select the maximum gradient: the magnitud
          if threshold == None:
+            # Getting frequencies
             frequency = magnitudes.get(mag, None)
             if frequency == None:
                magnitudes[mag] = 1
             else:
                magnitudes[mag] = frequency + 1
          elif mag > threshold:
+            # Puts white the pixels that exceeds the threshold
             newimage.putpixel((x, y), (255, 255, 255))
          else:
+            # Puts black the pixels that don't exceeds the threshold
             newimage.putpixel((x, y), (0, 0, 0))
    if threshold == None:
       return magnitudes
    else:
       newimage.save('newimage.png')
 
-
+# Thresholding
 def delimitthreshold(magnitudes):
    j=20
    discrete={}
    lastkey=magnitudes.keys()[-1]
-
+   # Makes buckets from the histogram of magnitudes
    for i in xrange(0, lastkey+1):
       if magnitudes.has_key(i):
          f = discrete.get(j, None)
@@ -71,17 +76,16 @@ def delimitthreshold(magnitudes):
             discrete[j] = f+magnitudes[i]
       if i%20 == 0 and i > 0:
          j += 20
-
-   print discrete.viewitems()
-   
-
-   minimum = max(discrete.values())
-   for key in discrete:
-      if discrete[key] == minimum:
-         threshold = key
-   print threshold
-   return threshold
-
+   # Determining the threshold
+   total = sum(discrete.values())
+   half = total/2
+   suma=0
+   # While the sum of frequencies is not greater than the half
+   for thresh in discrete:
+      suma += discrete[thresh]
+      if suma > half:
+         break
+   return thresh
 
 def main():
    try:
@@ -90,7 +94,6 @@ def main():
       image = openImage()
    #Calling edgedetection with an image as argument returns a histogram with the frequencies
    magnitudes = edgedetection(image)
-#   print magnitudes
    threshold = delimitthreshold(magnitudes)
    #edgedetection draws a new image if threshold is given
    edgedetection(image, threshold)

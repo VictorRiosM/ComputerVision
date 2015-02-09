@@ -1,4 +1,5 @@
 #!/usr/bin/python2
+#Function not imported in the edgedetection project
 import Image
 
 def edgedrawer(threshold):
