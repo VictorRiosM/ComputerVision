@@ -81,11 +81,13 @@ def delimitthreshold(magnitudes):
    half = total/2
    suma=0
    # While the sum of frequencies is not greater than the half
-   for thresh in discrete:
-      suma += discrete[thresh]
+   threshold=0
+   for key in discrete:
+      threshold+=20
+      suma += discrete[key]
       if suma > half:
          break
-   return thresh
+   return threshold
 
 def main():
    try:
