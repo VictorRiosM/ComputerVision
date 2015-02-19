@@ -2,7 +2,11 @@
 import Image, ImageDraw
 from sys import argv
 from imageprocessing import openImage
-from imageprocessing import neighborhood
+
+def center(x, y):
+   xmed = sum(x)/len(x)
+   ymed = sum(y)/len(y)
+   return xmed, ymed
 
 def drawbox(newimage, figure):
    x = []
@@ -16,43 +20,46 @@ def drawbox(newimage, figure):
    maxy = max(y)
    draw = ImageDraw.Draw(newimage)
    draw.rectangle((minx, miny, maxx, maxy), outline = 'green')
+   c = center(x, y)
+   draw.point(c, fill = 'green')
    return newimage
+
+def dfs((x, y), pixels, visited, width, height):
+   s = []
+   s_visited = []
+   s.append((x, y))
+   while len(s) > 0:
+      cur = s.pop()
+      if cur not in s_visited and cur not in visited:
+         for i in [-1, 0, 1]:
+            for j in [-1, 0, 1]:
+               nb = (cur[0]+i, cur[1]+j)
+               if nb[0] >= 0 and nb[1] >= 0 and nb[0] < width-1 and nb[1] < height-1:
+                  if pixels[nb] != (0, 0, 0):
+                     s.append(nb)
+         s_visited.append(cur)
+   return s_visited
 
 def detectshapes(image):
    pixels = image.load()
    width, height = image.size
-   #newimage=Image.new('RGB', (width, height))
    newimage = image.copy()
    visited = []
    nshapes = 0
    i=0
    for x in xrange(0, width):
       for y in xrange(0, height):
-         #print pixels[x, y]
          if pixels[x, y] != (0, 0, 0):
             i+=1
          if (x, y) not in visited and pixels[x, y] != (0, 0, 0):
             nshapes += 1
             print "nshapes", nshapes
-            #DFS
-            s = []
-            s_visited = []
-            s.append((x, y))
-            while len(s) > 0:
-               cur = s.pop()
-               if cur not in s_visited and cur not in visited:
-                  for i in [-1, 0, 1]:
-                     for j in [-1, 0, 1]:
-                        nb = (cur[0]+i, cur[1]+j)
-                        if nb[0] >= 0 and nb[1] >= 0 and nb[0] < width-1 and nb[1] < height-1:
-                           if pixels[nb] != (0, 0, 0):
-                              s.append(nb)
-                  s_visited.append(cur)
+            s_visited = dfs((x, y), pixels, visited, width, height)
             newimage = drawbox(newimage, s_visited)
             visited.extend(s_visited)
          visited.append((x, y))
    print i
-   newimage.save('newimage.png')
+   newimage.save('newimage2.png')
    print len(visited)
    print width, height, width*height, nshapes
 
