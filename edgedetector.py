@@ -3,6 +3,9 @@ import Image
 from sys import argv
 from imageprocessing import neighborhood
 from imageprocessing import openImage
+import matplotlib.pyplot as plt
+import numpy as np
+import cv2
 
 # These are the masks I use in order to detect edges
 A=1
@@ -20,6 +23,7 @@ masks = [ [B, 0, A, B, 0, A, B, 0, A],
 #The subroutine that computes the magnitudes and draws an image remarking the edges.
 def edgedetection(image, threshold = None):
    width, height = image.size
+   pixels = image.load()
    if threshold == None:
       magnitudes = {}
    else:
@@ -37,7 +41,8 @@ def edgedetection(image, threshold = None):
                w, h = nbh[j]
                if w >= 0 and h >= 0 and w < width-1 and h < height-1:
                   #Gets a value from RGB
-                  value = image.getpixel(nbh[j])
+                  #value = image.getpixel(nbh[j])
+                  value = pixels[nbh[j]]
                   gray = (value[0]+value[1]+value[2])/3
                   g[i] += gray*n 
                j+=1
@@ -92,10 +97,16 @@ def delimitthreshold(magnitudes):
 def main():
    try:
       image = Image.open(argv[1])
+      #image = cv2.imread(argv[1])
    except:
       image = openImage()
    #Calling edgedetection with an image as argument returns a histogram with the frequencies
    magnitudes = edgedetection(image)
+   hist, bins = np.histogram(magnitudes.values(), bins=10)
+   width = 0.7 * (bins[1]-bins[0])
+   center = (bins[:-1] + bins[1:])/2
+#   plt.bar(center, hist, align='center', width=width)
+#   plt.show()
    threshold = delimitthreshold(magnitudes)
    #edgedetection draws a new image if threshold is given
    edgedetection(image, threshold)

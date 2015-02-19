@@ -3,12 +3,14 @@ import Tkinter, tkFileDialog
 import Image, ImageDraw
 
 def draw():
-   image = Image.new('RGB', (50, 50))
+   image = Image.new('RGB', (100, 100))
    draw = ImageDraw.Draw(image)
    draw.ellipse((10, 10, 30, 30), outline = 'red')
-   #draw.ellipse((35, 35, 45, 45), outline = 'blue')
-   #name = raw_input("Name of the new image: ")
-   image.save('image.png')
+   draw.ellipse((35, 35, 45, 45), outline = 'blue')
+   draw.rectangle((60, 5, 80, 20), outline = 'red')
+   draw.ellipse((37, 10, 45, 20), outline = 'white')
+   name = raw_input("Name of the new image: ")
+   image.save(name)
    
 def openImage(file_path = None):
    if file_path == None:
@@ -95,8 +97,8 @@ def neighborhood(x, y):
   
 def main():
    draw()
-   image = Image.open('image.png')
-   findFigure(image)
+   #image = Image.open('image.png')
+   #findFigure(image)
 
 if __name__=='__main__':
    main()
