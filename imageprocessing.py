@@ -9,6 +9,7 @@ def draw():
    draw.ellipse((35, 35, 45, 45), outline = 'blue')
    draw.rectangle((60, 5, 80, 20), outline = 'red')
    draw.ellipse((37, 10, 45, 20), outline = 'white')
+   draw.polygon( [(50, 30), (30, 40), (20, 90), (80, 90), (90, 40)], outline='green')
    name = raw_input("Name of the new image: ")
    image.save(name)
    

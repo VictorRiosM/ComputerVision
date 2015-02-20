@@ -48,7 +48,7 @@ def dfs((x, y), pixels, visited, width, height):
          s_visited.append(cur)
    return s_visited
 
-def detectshapes(image):
+def detectshapes(image, path):
    pixels = image.load()
    width, height = image.size
    newimage = image.copy()
@@ -61,19 +61,17 @@ def detectshapes(image):
             i+=1
          if (x, y) not in visited and pixels[x, y] != (0, 0, 0):
             nshapes += 1
-            print "nshapes", nshapes
             s_visited = dfs((x, y), pixels, visited, width, height)
             newimage = drawbox(newimage, s_visited)
             visited.extend(s_visited)
          visited.append((x, y))
-   print i
-   newimage.save('newimage2.png')
-   print len(visited)
-   print width, height, width*height, nshapes
+   newimage.save(path)
 
 if __name__=='__main__':
    try:
       image = Image.open(argv[1])
+      path = argv[2]
    except:
       image = openImage()
-   detectshapes(image)
+      path = 'Shapesdetection/image2.png'
+   detectshapes(image, path)
