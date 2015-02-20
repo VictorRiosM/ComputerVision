@@ -39,7 +39,7 @@ def edgedetection(image, threshold = None):
             j=0
             for n in m:
                w, h = nbh[j]
-               if w >= 0 and h >= 0 and w < width-1 and h < height-1:
+               if w >= 0 and h >= 0 and w < width and h < height:
                   #Gets a value from RGB
                   #value = image.getpixel(nbh[j])
                   value = pixels[nbh[j]]
