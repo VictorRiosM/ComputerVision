@@ -2,11 +2,18 @@
 import Image, ImageDraw
 from sys import argv
 from imageprocessing import openImage
+import colorsys
+from random import uniform
 
 def center(x, y):
    xmed = sum(x)/len(x)
    ymed = sum(y)/len(y)
    return xmed, ymed
+
+def color():
+   hsv = uniform(0, 1), 1.0, 1.0
+   r, g, b = colorsys.hsv_to_rgb(*hsv)
+   return int(r*255), int(g*255), int(b*255)
 
 def drawbox(newimage, figure):
    x = []
@@ -19,9 +26,10 @@ def drawbox(newimage, figure):
    maxx = max(x)
    maxy = max(y)
    draw = ImageDraw.Draw(newimage)
-   draw.rectangle((minx, miny, maxx, maxy), outline = 'green')
+   col = color()
+   draw.rectangle((minx, miny, maxx, maxy), outline = col)
    c = center(x, y)
-   draw.point(c, fill = 'green')
+   draw.point(c, fill = col)
    return newimage
 
 def dfs((x, y), pixels, visited, width, height):
