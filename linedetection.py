@@ -3,7 +3,20 @@ import edgedetector
 from imageprocessing import openImage
 from sys import argv
 import Image
-from math import radians, cos, sin
+from math import radians, cos, sin, pi
+
+def drawimage(image, data, mostvoted):
+   width, height = image.size
+   newimage = image.copy()
+   for x in xrange(0, width):
+      for y in xrange(0, height):
+         ang, rho = data[x][y]
+         if (ang, rho) in mostvoted and sin(ang)!=0:
+            ycoord = (-cos(ang)/sin(ang))*x + rho/sin(ang) # Equation
+            if ycoord >= 0 and ycoord < height:
+               newimage.putpixel((x, int(ycoord)), (255, 0, 0))
+   newimage.save('newimage.png')
+   newimage.show()
 
 def linedetection(image, magnitudes, angle):
    pixels = image.load()
@@ -14,17 +27,15 @@ def linedetection(image, magnitudes, angle):
       ydata = list()
       for y in xrange(0, height):
          if angle[i] is not None:
-            orad = radians(angle[i])
+            orad = radians(angle[i])%pi
             rho = (x*cos(orad) + y*sin(orad))
-            ydata.append((round(orad), round(rho)))
+            ydata.append((orad, rho))
          else:
             ydata.append((None, None))
          i+=1
       data.append(ydata)
 
-   # Excluding background
    pairs = dict()
-   groups = list()
    for x in xrange(0, width):
       for y in xrange(0, height):
          if x>0 and x<width-1 and y>0 and y<height-1:
@@ -35,23 +46,12 @@ def linedetection(image, magnitudes, angle):
                   pairs[pair] += 1
                else:
                   pairs[pair] = 1
-               if (ang, rho) not in groups:
-                  groups.append((ang, rho))
 
-   newimage = image.copy()
-   for x in xrange(0, width):
-      for y in xrange(0, height):
-         ang, rho = data[x][y]
-         if ang is not None and sin(ang) != 0:
-            ycoord = (-1)*(cos(ang)/sin(ang))*x + (rho/sin(ang))
-            if ycoord >= 0 and ycoord < height:
-               newimage.putpixel((x, int(ycoord)), (255, 0, 0))
-   newimage.save('newimage.png')
-   newimage.show()
-
-   print groups
-   print len(pairs)
-   print width*height
+   mostvoted = list()
+   for pair in pairs:
+      if pair is not (None, None): #and pairs[pair] > 2:
+         mostvoted.append(pair)
+   drawimage(image, data, mostvoted)
 
 
 try:
