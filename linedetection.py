@@ -16,7 +16,7 @@ def linedetection(image, magnitudes, angle):
          if angle[i] is not None:
             orad = math.radians(angle[i])
             rho = (x*math.cos(orad) + y*math.sin(orad))
-            edges.append((orad, rho))
+            edges.append(('%.0f' % orad, '%.0f' % rho))
          else:
             edges.append((None, None))
          i+=1
@@ -30,7 +30,7 @@ def linedetection(image, magnitudes, angle):
       else:
          pairs[pair] = 1
 
-
+   print pairs
 
 
 
