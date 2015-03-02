@@ -60,7 +60,7 @@ def edgedetection(image, threshold = None):
                   elif i == 5: orientation=225.0
                   elif i == 6: orientation=270.0
                   else: orientation=315.0
-               pixelsorientation.append(orientation)
+            pixelsorientation.append(orientation)
          if threshold == None:
             # Getting frequencies
             frequency = magnitudes.get(mag, None)

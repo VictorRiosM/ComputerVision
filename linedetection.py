@@ -3,35 +3,55 @@ import edgedetector
 from imageprocessing import openImage
 from sys import argv
 import Image
-import math
-
+from math import radians, cos, sin
 
 def linedetection(image, magnitudes, angle):
    pixels = image.load()
    width, height = image.size
-   edges = list()
+   data = list()
    i=0
    for x in xrange(0, width):
+      ydata = list()
       for y in xrange(0, height):
          if angle[i] is not None:
-            orad = math.radians(angle[i])
-            rho = (x*math.cos(orad) + y*math.sin(orad))
-            edges.append(('%.0f' % orad, '%.0f' % rho))
+            orad = radians(angle[i])
+            rho = (x*cos(orad) + y*sin(orad))
+            ydata.append((round(orad), round(rho)))
          else:
-            edges.append((None, None))
+            ydata.append((None, None))
          i+=1
+      data.append(ydata)
 
-   # Including background
-   pairs={}
-   for i in xrange(0, len(edges)):
-      pair = (edges[i])
-      if pair in pairs:
-         pairs[pair] += 1
-      else:
-         pairs[pair] = 1
+   # Excluding background
+   pairs = dict()
+   groups = list()
+   for x in xrange(0, width):
+      for y in xrange(0, height):
+         if x>0 and x<width-1 and y>0 and y<height-1:
+            ang, rho = data[x][y]
+            if ang is not None:
+               pair = (data[x][y])
+               if pair in pairs:
+                  pairs[pair] += 1
+               else:
+                  pairs[pair] = 1
+               if (ang, rho) not in groups:
+                  groups.append((ang, rho))
 
-   print pairs
+   newimage = image.copy()
+   for x in xrange(0, width):
+      for y in xrange(0, height):
+         ang, rho = data[x][y]
+         if ang is not None and sin(ang) != 0:
+            ycoord = (-1)*(cos(ang)/sin(ang))*x + (rho/sin(ang))
+            if ycoord >= 0 and ycoord < height:
+               newimage.putpixel((x, int(ycoord)), (255, 0, 0))
+   newimage.save('newimage.png')
+   newimage.show()
 
+   print groups
+   print len(pairs)
+   print width*height
 
 
 try:
