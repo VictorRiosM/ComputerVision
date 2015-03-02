@@ -12,11 +12,10 @@ def drawimage(image, data, mostvoted):
       for y in xrange(0, height):
          ang, rho = data[x][y]
          if (ang, rho) in mostvoted and sin(ang)!=0:
-            ycoord = (-cos(ang)/sin(ang))*x + rho/sin(ang) # Equation
+            ycoord = (-cos(ang)/sin(ang))*x + rho/sin(ang) # Line equation
             if ycoord >= 0 and ycoord < height:
                newimage.putpixel((x, int(ycoord)), (255, 0, 0))
    newimage.save('newimage.png')
-   newimage.show()
 
 def linedetection(image, magnitudes, angle):
    pixels = image.load()
@@ -49,7 +48,7 @@ def linedetection(image, magnitudes, angle):
 
    mostvoted = list()
    for pair in pairs:
-      if pair is not (None, None): #and pairs[pair] > 2:
+      if pair is not (None, None):
          mostvoted.append(pair)
    drawimage(image, data, mostvoted)
 
