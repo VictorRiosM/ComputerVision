@@ -3,27 +3,25 @@ import Image
 from sys import argv
 from imageprocessing import neighborhood
 from imageprocessing import openImage
-import matplotlib.pyplot as plt
-import numpy as np
-import cv2
 
 # These are the masks I use in order to detect edges
 A=1
 B=-1
-masks = [ [B, 0, A, B, 0, A, B, 0, A],
-          [0, A, A, B, 0, A, B, B, 0],
-          [A, A, A, 0, 0, 0, B, B, B],
-          [A, A, 0, A, 0, B, 0, B, B],
-          [A, 0, B, A, 0, B, A, 0, B],
-          [0, B, B, A, 0, B, A, A, 0],
-          [B, B, B, 0, 0, 0, A, A, A],
-          [B, B, 0, B, 0, A, 0, A, A] ]
+masks = [ [B, 0, A, B, 0, A, B, 0, A], # 0
+          [0, A, A, B, 0, A, B, B, 0], # 45
+          [A, A, A, 0, 0, 0, B, B, B], # 90
+          [A, A, 0, A, 0, B, 0, B, B], # 135
+          [A, 0, B, A, 0, B, A, 0, B], # 180
+          [0, B, B, A, 0, B, A, A, 0], # 225
+          [B, B, B, 0, 0, 0, A, A, A], # 270
+          [B, B, 0, B, 0, A, 0, A, A] ] # 315
 
          
 #The subroutine that computes the magnitudes and draws an image remarking the edges.
 def edgedetection(image, threshold = None):
    width, height = image.size
    pixels = image.load()
+   pixelsorientation = []
    if threshold == None:
       magnitudes = {}
    else:
@@ -47,7 +45,22 @@ def edgedetection(image, threshold = None):
                   g[i] += gray*n 
                j+=1
             i+=1
-         mag = max(g) #Select the maximum gradient: the magnitud
+         mag = max(g) # Select the maximum gradient: the magnitud
+         # Angles
+         if g[0] == 0 and g[1] == 0 and g[2] == 0 and g[3] == 0 and g[4] == 0 and g[5] == 0 and g[6] == 0 and g[7] == 0:
+            pixelsorientation.append(None)
+         else:
+            for i in xrange(0, 8):
+               if g[i] == mag:
+                  if i == 0: orientation=0.0 
+                  elif i == 1: orientation=45.0
+                  elif i == 2: orientation=90.0
+                  elif i == 3: orientation=135.0
+                  elif i == 4: orientation=180.0
+                  elif i == 5: orientation=225.0
+                  elif i == 6: orientation=270.0
+                  else: orientation=315.0
+               pixelsorientation.append(orientation)
          if threshold == None:
             # Getting frequencies
             frequency = magnitudes.get(mag, None)
@@ -62,7 +75,7 @@ def edgedetection(image, threshold = None):
             # Puts black the pixels that don't exceeds the threshold
             newimage.putpixel((x, y), (0, 0, 0))
    if threshold == None:
-      return magnitudes
+      return magnitudes, pixelsorientation
    else:
       newimage.save('newimage.png')
 
@@ -101,12 +114,10 @@ def main():
    except:
       image = openImage()
    #Calling edgedetection with an image as argument returns a histogram with the frequencies
-   magnitudes = edgedetection(image)
+   magnitudes, pixelsorientation = edgedetection(image)
    hist, bins = np.histogram(magnitudes.values(), bins=10)
    width = 0.7 * (bins[1]-bins[0])
    center = (bins[:-1] + bins[1:])/2
-#   plt.bar(center, hist, align='center', width=width)
-#   plt.show()
    threshold = delimitthreshold(magnitudes)
    #edgedetection draws a new image if threshold is given
    edgedetection(image, threshold)
