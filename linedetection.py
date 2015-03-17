@@ -2,22 +2,25 @@
 import edgedetector
 from imageprocessing import openImage
 from sys import argv
-import Image
+import Image, ImageDraw
 from math import radians, cos, sin, pi
+from colors import color
 
-def drawimage(image, data, mostvoted):
+
+def drawline(image, line, data):
    width, height = image.size
-   newimage = image.copy()
-   for x in xrange(0, width):
-      for y in xrange(0, height):
-         ang, rho = data[x][y]
-         if (ang, rho) in mostvoted and sin(ang)!=0:
-            ycoord = (-cos(ang)/sin(ang))*x + rho/sin(ang) # Line equation
+   c = color()
+   for y in xrange(0, height):
+      for x in xrange(0, width):
+         if line[0] != 0:
+            ycoord = (-cos(line[0])/sin(line[0]))*x + line[1]/sin(line[0])
             if ycoord >= 0 and ycoord < height:
-               newimage.putpixel((x, int(ycoord)), (255, 0, 0))
-   newimage.save('newimage.png')
+               image.putpixel((x, int(ycoord)), c)
+   image.save('newimage.png')
 
-def linedetection(image, magnitudes, angle):
+
+def linedetection(image):
+   magnitudes, angle = edgedetector.edgedetection(image)
    pixels = image.load()
    width, height = image.size
    data = list()
@@ -28,7 +31,8 @@ def linedetection(image, magnitudes, angle):
          if angle[i] is not None:
             orad = radians(angle[i])%pi
             rho = (x*cos(orad) + y*sin(orad))
-            ydata.append((orad, rho))
+            ydata.append((float('%.2f' % orad), float('%.f' % rho)))
+            
          else:
             ydata.append((None, None))
          i+=1
@@ -45,17 +49,22 @@ def linedetection(image, magnitudes, angle):
                   pairs[pair] += 1
                else:
                   pairs[pair] = 1
-
-   mostvoted = list()
+   
+#   print pairs.values()
+   lines = list()
    for pair in pairs:
-      if pair is not (None, None):
-         mostvoted.append(pair)
-   drawimage(image, data, mostvoted)
+      if pairs[pair] > 3:
+         lines.append(pair)
+
+#   for line in lines:
+#      drawline(image, line, data)
+   
+   return lines, data
+
 
 
 try:
    image = Image.open(argv[1])
 except:
    image = openImage()
-magnitudes, angles = edgedetector.edgedetection(image)
-linedetection(image, magnitudes, angles)
+lines, data = linedetection(image)
