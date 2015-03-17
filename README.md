@@ -3,6 +3,9 @@
 
 This repository is focused on computer vision projects.
 
+##Pedestrian Detection
+[Pedestrian Detection PDF](http://victorriosm.github.io/ComputerVision/PedestrianDetection/PedestrianDetection.pdf).
+
 ##Edge detection
 The first work is an edge detector. The edgedetector.py file contains the code for such work. I have included a folder with images that have been used with the edge detector.
 
