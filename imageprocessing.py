@@ -5,11 +5,9 @@ import Image, ImageDraw
 def draw():
    image = Image.new('RGB', (100, 100))
    draw = ImageDraw.Draw(image)
-   draw.ellipse((10, 10, 30, 30), outline = 'red')
-   draw.ellipse((35, 35, 45, 45), outline = 'blue')
-   draw.rectangle((60, 5, 80, 20), outline = 'red')
-   draw.ellipse((37, 10, 45, 20), outline = 'white')
-   draw.polygon( [(50, 30), (30, 40), (20, 90), (80, 90), (90, 40)], outline='green')
+   draw.ellipse((5, 5, 20, 30), fill='yellow')
+   draw.ellipse((10, 35, 45, 45), fill='blue')
+   draw.ellipse((37, 10, 45, 20), fill = 'green')
    name = raw_input("Name of the new image: ")
    image.save(name)
    

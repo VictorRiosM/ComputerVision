@@ -4,7 +4,7 @@ from imageprocessing import openImage
 from sys import argv
 import Image, ImageDraw
 from math import radians, cos, sin, pi
-from colors import color
+from cv_lab.colors import color
 
 
 def drawline(image, line, data):
@@ -53,11 +53,11 @@ def linedetection(image):
 #   print pairs.values()
    lines = list()
    for pair in pairs:
-      if pairs[pair] > 3:
+      if pairs[pair] > 1:
          lines.append(pair)
 
-#   for line in lines:
-#      drawline(image, line, data)
+   for line in lines:
+      drawline(image, line, data)
    
    return lines, data
 

@@ -3,7 +3,7 @@ import Image
 from sys import argv
 from imageprocessing import neighborhood
 from imageprocessing import openImage
-from math import atan2
+from math import atan2, pi
 
 # These are the masks I use in order to detect edges
 #A=1
@@ -25,12 +25,13 @@ masks = [ [-1, 0, 1, -2, 0, 2, -1, 0, 1],
 def edgedetection(image, threshold = None):
    width, height = image.size
    pixels = image.load()
-   pixelsorientation = []
+   angles = []
    if threshold == None:
       magnitudes = {}
    else:
       newimage = Image.new('RGB', (width, height))
    for x in xrange(0, width):
+      pixelsorientation = []
       for y in xrange(0, height):
          nbh = neighborhood(x, y) #Gets the pixel neighborhood
          g = [] # A list for the gradients
@@ -56,8 +57,11 @@ def edgedetection(image, threshold = None):
 
          # Angles
          orientation=atan2(g[1], g[0])
-         if orientation < 0.0001:
-            orientation = None
+         if orientation < 0:
+            orientation += pi*2
+         #orientation=abs(orientation-pi/2)
+         #if orientation < 0.0001:
+         #   orientation = None
          pixelsorientation.append(orientation)
          # if g[0] == 0 and g[1] == 0 and g[2] == 0 and g[3] == 0 and g[4] == 0 and g[5] == 0 and g[6] == 0 and g[7] == 0:
          #    pixelsorientation.append(None)
@@ -73,7 +77,7 @@ def edgedetection(image, threshold = None):
          #          elif i == 6: orientation=270.0
          #          else: orientation=315.0
          #    pixelsorientation.append(orientation)
-
+         
 
          if threshold == None:
             # Getting frequencies
@@ -88,8 +92,10 @@ def edgedetection(image, threshold = None):
          else:
             # Puts black the pixels that don't exceeds the threshold
             newimage.putpixel((x, y), (0, 0, 0))
+      angles.append(pixelsorientation)
    if threshold == None:
-      return magnitudes, pixelsorientation
+      return magnitudes, angles
+      
    else:
       newimage.save('newimage.png')
 

@@ -94,6 +94,27 @@ def floodfill(pixels, p, width, height):
             s.append((x, y+1))
    return pixels, newcolor, shape
 
+def getshapes(width, height, pixels):
+   i = Image.new('RGB', (width, height))
+   for x in xrange(0, width):
+      for y in xrange(0, height):
+         i.putpixel((x, y), pixels[x, y])
+   visited = [] # List to save the visited pixels
+   nshapes = 0
+   shapes = []
+   for x in xrange(0, width):
+      for y in xrange(0, height):
+         # Detect shape by edges
+         if (x, y) not in visited and pixels[x, y] == (255, 255, 255):
+            nshapes += 1
+            # The dfs subroutine returns the shape edge pixels
+            s_visited = dfs((x, y), pixels, visited, width, height)
+            # Draw the box and the mass center
+            #i = drawbox(i, s_visited, colors[nshapes], mcenters[nshapes])
+            shapes.append(s_visited)
+            visited.extend(s_visited)
+         visited.append((x, y))
+   return nshapes, shapes
 
 # The main subroutine for shapedetection
 def detectshapes(image, path):
@@ -113,24 +134,9 @@ def detectshapes(image, path):
          if shape != None:
             mcenters.append(getmasscenter(shape))
             percentages.append(getpercentage(shape, width, height))
-   i = Image.new('RGB', (width, height))
-   for x in xrange(0, width):
-      for y in xrange(0, height):
-         i.putpixel((x, y), pixels[x, y])
    
-   visited = [] # List to save the visited pixels
-   nshapes=0
-   for x in xrange(0, width):
-      for y in xrange(0, height):
-         # Detect shape by edges
-         if (x, y) not in visited and pixels[x, y] == (255, 255, 255):
-            nshapes += 1
-            # The dfs subroutine returns the shape edge pixels
-            s_visited = dfs((x, y), pixels, visited, width, height)
-            # Draw the box and the mass center
-            i = drawbox(i, s_visited, colors[nshapes], mcenters[nshapes])
-            visited.extend(s_visited)
-         visited.append((x, y))
+   nshapes, shapes = getshapes(width, height, pixels, colors)
+
    i.save(path)
    pbgcolor = max(percentages)
    for n in xrange(0, nshapes):
