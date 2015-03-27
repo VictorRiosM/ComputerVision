@@ -27,3 +27,8 @@ The folder 'Shapesdetection' contains some images in which the script has been u
 ##Line detection
 The third work detects lines in images.
 The folder Linedetection contains some examples.
+
+##Circle detection
+
+##Ellipses
+The folder "ellipes" contains some images generated in this work. 

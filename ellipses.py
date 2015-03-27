@@ -7,8 +7,23 @@ import Image, ImageDraw
 from cv_lab.colors import color
 from random import choice
 import pickle
-from math import sin, cos
-  
+from math import sin, cos, pi, sqrt, atan2
+
+            
+def voting(m, possible, pixels, x1, x2, y1, y2):
+    x = x2+1
+    while True:
+        y = m*x+y1
+        if pixels[x, y] == (255, 255, 255):
+            break
+        else:
+            if (x, y) in possible:
+                possible[(x, y)]+=1
+            else:
+                possible[(x, y)] = 1
+        x+=1
+    return possible
+    
 
 def detectellipses(image):
     pixels = image.load()
@@ -20,10 +35,11 @@ def detectellipses(image):
     shapes = pickle.load(open('shapes.txt', 'r'))
     angles = pickle.load(open('angles.txt', 'r'))
     #print shapes
-    nshapes = 4
-    norandomps = 40
+    nshapes = 3
+    norandomps = 2000
     draw = ImageDraw.Draw(image)
     for shape in shapes:
+        possible = dict()
         if (0, 0) in shape:
             nshapes-=1
             shapes.remove(shape)
@@ -37,13 +53,15 @@ def detectellipses(image):
             # Midpoint
             xm = (xp1+xp2)/2
             ym = (yp1+yp2)/2
-#            draw.ellipse((xm-1, ym-1, xm+1, ym+1), fill='green')
+            #draw.ellipse((xm-1, ym-1, xm+1, ym+1), fill='green')
 
             #print xp1, yp1, xp2, yp2
             thetap1 = angles[xp1][yp1]
             thetap2 = angles[xp2][yp2]
-#            print thetap1, thetap2
-            
+            #thetap1 = pi/2 - thetap1
+            #thetap2 = pi/2 - thetap2
+            #print thetap1, thetap2
+
             tsize = 50
             if thetap1 is not None and thetap2 is not None:
                 # Tangent P1
@@ -65,24 +83,37 @@ def detectellipses(image):
                 
                 # Intersection
                 # From Wikipedia http://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-                
-                
                 try:
                     Denominador = (xap1-xbp1)*(yap2-ybp2)-(yap1-ybp1)*(xap2-xbp2)
                     PF1 = (xap1*ybp1-yap1*xbp1)
                     PF2 = (xap2*ybp2-yap2*xbp2)
                     Px = (PF1*(xap2-xbp2)-(xap1-xbp1)*PF2)/Denominador
                     Py = (PF1*(yap2-ybp2)-(yap1-ybp1)*PF2)/Denominador
-                    draw.ellipse((Px-1, Py-1, Px+1, Py+1), fill='red')
+                    #draw.ellipse((Px-1, Py-1, Px+1, Py+1), fill='red')
                     # Line intersection - midpoint
-                    draw.line((Px, Py, xm, ym), fill='white')
+                    #draw.line((Px, Py, xm, ym), fill='white')
+
+                    m=(ym-Py)/(xm-Px)
+                    possible = voting(m, possible, pixels, Px, xm, Py, ym)
+
                 except:
                     pass
-                
-                               
 
-    print shapes
-    image.save("tangents.png")        
+        try:                        
+            maximum = max(possible.values())
+            #print max(possible.values())
+            listmaximum = []
+            for i in possible:
+                if possible[i] == maximum:
+                    center = i
+            draw.ellipse((int(center[0])-3, int(center[1])-3, int(center[0])+3, int(center[1])+3), fill='orange')
+            draw.text((center[0]+6, center[1]), str(nshapes), fill='white')
+            nshapes-=1
+        except:
+            pass
+        
+
+    image.save("tangents.png")
 
 if __name__=='__main__':
     try:

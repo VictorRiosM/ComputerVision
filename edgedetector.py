@@ -59,6 +59,7 @@ def edgedetection(image, threshold = None):
          orientation=atan2(g[1], g[0])
          if orientation < 0:
             orientation += pi*2
+         #orientation = (orientation - pi/2)
          #orientation=abs(orientation-pi/2)
          #if orientation < 0.0001:
          #   orientation = None
