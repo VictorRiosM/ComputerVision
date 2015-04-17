@@ -20,7 +20,8 @@ def paintbg(pixels, width, height, bgcolor, ncolor):
         for y in xrange(0, height):
             (r, g, b) = pixels[x, y]
             (bgr, bgg, bgb) = bgcolor
-            if r > bgr-20 and r < bgr+20 and g > bgg-20 and g < bgg+20 and b > bgb-20 and b < bgb+20:
+            bgthresh = 40
+            if r > bgr-bgthresh and r < bgr+bgthresh and g > bgg-bgthresh and g < bgg+bgthresh and b > bgb-bgthresh and b < bgb+bgthresh:
                 pixels[x, y] = ncolor
             else:
                 (r, g, b) = pixels[x, y]
@@ -67,8 +68,22 @@ def drawpikes(image, rows_histo, cols_histo, rows_threshold, cols_threshold):
     return x_prob, y_prob            
 
 
+def getholes(image, x_prob, y_prob):
+    width, height = image.size
+    pixels = image.load()
+    visited = list()
+    hole_pixels = list()
+    for x in xrange(0, width):
+        for y in xrange(0, height):
+            if x in x_prob and y in y_prob and pixels[x, y] != (255, 255, 255):
+                hole_pixels.append((x, y))
+    return hole_pixels
+    
+
+
 def holedetection(image):
     pixels = image.load()
+    holes_in_original = image.copy()
     width, height = image.size
     colorshisto = colorshistogram(pixels, width, height)
     maxcolor = max(colorshisto.values())
@@ -78,10 +93,11 @@ def holedetection(image):
             bgcolor = key
             break
     print bgcolor
-    pixels = filter(image)
+    #pixels = filter(image)
     pixels = paintbg(pixels, width, height, bgcolor, (255, 255, 255))
     #pixels = filter(image)
     image.save('gray.png')
+    holes_image = image.copy()
     rows_histo, cols_histo = rows_cols_histograms(pixels, width, height)
     #print rows_histo, cols_histo
     
@@ -96,6 +112,12 @@ def holedetection(image):
     #print rows_median, cols_median
     #image.save("pikes.png")
     print x_prob, y_prob
+    hole_pixels=getholes(holes_image, x_prob, y_prob)
+    
+    pixels2 = holes_in_original.load()
+    for pixel in hole_pixels:
+        pixels2[pixel] = (0, 255, 0)
+    holes_in_original.save('hole_pixels.png')
 
 
 if __name__=='__main__':
