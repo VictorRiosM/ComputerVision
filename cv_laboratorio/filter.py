@@ -4,10 +4,11 @@ from imageprocessing import openImage
 from sys import argv
 
 def filter(image, fil='median', nbh='8'):
-   image.show()
+   
+   image.convert("RGB")
    pixels = image.load()
    width, height = image.size
-   newimage = Image.new('RGB', (width, height))
+   #newimage = Image.new('RGB', (width, height))
 
    # Filter by median
    if fil=='median':
@@ -17,8 +18,8 @@ def filter(image, fil='median', nbh='8'):
                rlist = []
                glist = []
                blist = []
-               for i in [-1, 0, 1]:
-                  for j in [-1, 0, 1]:
+               for i in [-2, 0, 2]:
+                  for j in [-2, 0, 2]:
                      if x+i>=0 and x+i<width and y+j>=0 and y+j<height:
                         r, g, b = pixels[x+i, y+j]
                         rlist.append(r)
@@ -27,7 +28,8 @@ def filter(image, fil='median', nbh='8'):
                rmedian = sum(rlist)/len(rlist)
                gmedian = sum(glist)/len(glist)
                bmedian = sum(blist)/len(blist)
-               newimage.putpixel((x, y), (rmedian, gmedian, bmedian))
+               #newimage.putpixel((x, y), (rmedian, gmedian, bmedian))
+               pixels[x, y] = (rmedian, gmedian, bmedian)
 
    # The minimum value
    elif fil=='min':
@@ -67,10 +69,11 @@ def filter(image, fil='median', nbh='8'):
                rmax = max(rlist)
                gmax = max(glist)
                bmax = max(blist)
-               newimage.putpixel((x, y), (rmax, gmax, bmax))
+               pixels[x, y] = (rmax, gmax, bmax)
 
-   newimage.save('newimage.png')
-   newimage.show()
+   #newimage.save('newimage.png')
+   #newimage.show()
+   return pixels
 
 if __name__=='__main__':
    try:

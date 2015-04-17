@@ -20,6 +20,53 @@ from math import atan2, pi
 masks = [ [-1, 0, 1, -2, 0, 2, -1, 0, 1],
           [1, 2, 1, 0, 0, 0, -1, -2, -1] ]
 
+
+# Convolution
+def convolution(pixels, width, height):
+   magnitudes = []
+   angles = []
+   for y in xrange(0, height):
+      gcols = []
+      acols = []
+      for x in xrange(0, width):
+         gx = 0
+         gy = 0
+         index = 0
+         for i in [-1, 0, 1]:
+            for j in [-1, 0, 1]:
+               if x+i >= 0 and x+i < width and y+j >= 0 and y+j < height:
+                  rgb = pixels[x+i, y+j]
+                  gray = (rgb[0] + rgb[1] + rgb[2]) / 3
+                  gx += gray*masks[0][index]
+                  gy += gray*masks[1][index]
+                  index += 1
+         g = max(abs(gx), abs(gy))
+         theta = atan2(gy, gx)
+         gcols.append(g)
+         acols.append(theta)
+      magnitudes.append(gcols)
+      angles.append(acols)
+   return magnitudes, angles
+
+
+def drawedges(pixels, magnitudes, width, height, threshold):
+   for y in xrange(0, height-1):
+      for x in xrange(0, width-1):
+         if magnitudes[y][x] > threshold:
+            pixels[x, y] = (255, 255, 255)
+         else:
+            pixels[x, y] = (0, 0, 0)
+   return pixels
+
+
+def edgedetect(image):
+   pixels = image.load()
+   width, height = image.size
+   magnitudes, angles = convolution(pixels, width, height)
+   threshold = 100
+   pixels = drawedges(pixels, magnitudes, width, height, threshold)
+   image.save("edge.png")
+   image.show()
          
 #The subroutine that computes the magnitudes and draws an image remarking the edges.
 def edgedetection(image, threshold = None):
@@ -63,23 +110,7 @@ def edgedetection(image, threshold = None):
          #orientation=abs(orientation-pi/2)
          #if orientation < 0.0001:
          #   orientation = None
-         pixelsorientation.append(orientation)
-         # if g[0] == 0 and g[1] == 0 and g[2] == 0 and g[3] == 0 and g[4] == 0 and g[5] == 0 and g[6] == 0 and g[7] == 0:
-         #    pixelsorientation.append(None)
-         # else:
-         #    for i in xrange(0, 8):
-         #       if g[i] == mag:
-         #          if i == 0: orientation=0.0 
-         #          elif i == 1: orientation=45.0
-         #          elif i == 2: orientation=90.0
-         #          elif i == 3: orientation=135.0
-         #          elif i == 4: orientation=180.0
-         #          elif i == 5: orientation=225.0
-         #          elif i == 6: orientation=270.0
-         #          else: orientation=315.0
-         #    pixelsorientation.append(orientation)
-         
-
+         pixelsorientation.append(orientation)        
          if threshold == None:
             # Getting frequencies
             frequency = magnitudes.get(mag, None)
@@ -135,13 +166,14 @@ def main():
    except:
       image = openImage()
    #Calling edgedetection with an image as argument returns a histogram with the frequencies
-   magnitudes, pixelsorientation = edgedetection(image)
+   #magnitudes, pixelsorientation = edgedetection(image)
    #hist, bins = np.histogram(magnitudes.values(), bins=10)
    #width = 0.7 * (bins[1]-bins[0])
    #center = (bins[:-1] + bins[1:])/2
-   threshold = delimitthreshold(magnitudes)
+   #threshold = delimitthreshold(magnitudes)
    #edgedetection draws a new image if threshold is given
-   edgedetection(image, threshold)
+   #edgedetection(image, threshold)
+   edgedetect(image)
 
 if __name__=='__main__':
    main()

@@ -4,7 +4,7 @@ import shapesdetector
 from imageprocessing import openImage
 from sys import argv
 import Image, ImageDraw
-from cv_lab.colors import color
+from cv_laboratorio.colors import color
 from random import choice
 import pickle
 from math import sin, cos, pi, sqrt, atan2
