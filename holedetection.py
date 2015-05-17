@@ -2,7 +2,9 @@
 import Image, ImageDraw
 from imageprocessing import openImage
 from sys import argv
-from cv_laboratorio.filter import filter
+from cv_laboratorio.colors import color
+from shapesdetector import dfs
+from shapesdetector import drawbox
 
 def colorshistogram(pixels, width, height):
     histo = dict()
@@ -68,7 +70,7 @@ def drawpikes(image, rows_histo, cols_histo, rows_threshold, cols_threshold):
     return x_prob, y_prob            
 
 
-def getholes(image, x_prob, y_prob):
+def getholepixels(image, x_prob, y_prob):
     width, height = image.size
     pixels = image.load()
     visited = list()
@@ -82,42 +84,54 @@ def getholes(image, x_prob, y_prob):
 
 
 def holedetection(image):
+
     pixels = image.load()
     holes_in_original = image.copy()
     width, height = image.size
     colorshisto = colorshistogram(pixels, width, height)
     maxcolor = max(colorshisto.values())
-    print maxcolor
     for key in colorshisto:
         if colorshisto[key] == maxcolor:
             bgcolor = key
             break
-    print bgcolor
-    #pixels = filter(image)
+
     pixels = paintbg(pixels, width, height, bgcolor, (255, 255, 255))
-    #pixels = filter(image)
     image.save('gray.png')
     holes_image = image.copy()
     rows_histo, cols_histo = rows_cols_histograms(pixels, width, height)
-    #print rows_histo, cols_histo
-    
+     
     rows_threshold = int(sum(rows_histo.values())/height)
     cols_threshold = int(sum(cols_histo.values())/width)
-    #rows_threshold = max(rows_histo.values())
-    #cols_threshold = max(cols_histo.values())
-    print rows_threshold
-    print cols_threshold
-    
+
     x_prob, y_prob = drawpikes(image, rows_histo, cols_histo, rows_threshold, cols_threshold)
-    #print rows_median, cols_median
-    #image.save("pikes.png")
-    print x_prob, y_prob
-    hole_pixels=getholes(holes_image, x_prob, y_prob)
-    
+
+    hole_pixels=getholepixels(holes_image, x_prob, y_prob)
     pixels2 = holes_in_original.load()
     for pixel in hole_pixels:
         pixels2[pixel] = (0, 255, 0)
     holes_in_original.save('hole_pixels.png')
+                
+
+    holes = list()
+    visited = list()
+    for x in xrange(0, width):
+        for y in xrange(0, height):
+            if (x, y) not in visited and pixels2[x, y] == (0, 255, 0):
+                s_visited = dfs((x, y), pixels2, visited, width, height, hole_pixels)
+                print s_visited
+                print
+                holes.append(s_visited)
+                visited.extend(s_visited)
+            visited.append((x, y))
+    
+    print len(holes)
+
+    colors = color(len(holes))
+    i=0
+    for hole in holes:
+        holes_in_original = drawbox(holes_in_original, hole, colors[i])
+        i+=1
+    holes_in_original.save("HolesOutput.png")
 
 
 if __name__=='__main__':

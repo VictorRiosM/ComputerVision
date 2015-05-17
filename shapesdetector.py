@@ -30,7 +30,7 @@ def color():
    return int(r*255), int(g*255), int(b*255)
 
 # Draw the bounding box and the mass center
-def drawbox(newimage, figure, col, mcenter):
+def drawbox(newimage, figure, col):
    x = []
    y = []
    for i in figure:
@@ -43,9 +43,9 @@ def drawbox(newimage, figure, col, mcenter):
    draw = ImageDraw.Draw(newimage)
    draw.rectangle((minx, miny, maxx, maxy), outline = col)
    # Mass center Black
-   draw.point(mcenter, fill = 'black')
+   # draw.point(mcenter, fill = 'black')
    # Bounding box center Yellow
-   draw.point(boxcenter(x, y), fill = 'yellow')
+   # draw.point(boxcenter(x, y), fill = 'yellow')
    return newimage
 
 def getpercentage(shape, width, height):
@@ -63,7 +63,8 @@ def dfs((x, y), pixels, visited, width, height):
             for j in [-1, 0, 1]:
                nb = (cur[0]+i, cur[1]+j)
                if nb[0] >= 0 and nb[1] >= 0 and nb[0] < width and nb[1] < height:
-                  if pixels[nb] == (255, 255, 255):
+                  #if pixels[nb] == (255, 255, 255): Changed for the usage in the holes
+                  if pixels[nb] == (0, 255, 0):
                      s.append(nb)
          s_visited.append(cur)
    return s_visited
@@ -135,7 +136,7 @@ def detectshapes(image, path):
             mcenters.append(getmasscenter(shape))
             percentages.append(getpercentage(shape, width, height))
    
-   nshapes, shapes = getshapes(width, height, pixels, colors)
+   nshapes, shapes = getshapes(width, height, pixels)
 
    i.save(path)
    pbgcolor = max(percentages)

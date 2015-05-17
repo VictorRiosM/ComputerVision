@@ -22,5 +22,5 @@ def color(n):
    return colors
 
 #r, g, b = color()
-colors = color(5)
-print colors
+#colors = color(5)
+#print colors
