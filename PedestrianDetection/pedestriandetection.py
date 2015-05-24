@@ -4,18 +4,63 @@ from sys import argv
 import cv2
 import os
 import imp
-
+# Import colors
 colorsfile = imp.load_source('colors', '../cv_laboratorio/colors.py')
+
+# Get image or video
 
 try:
     cap = cv2.VideoCapture(argv[1])
 except:
     cap = cv2.VideoCapture('/home/victor/TownCentreXVID.avi')
 
-fgbg = cv2.BackgroundSubtractorMOG2()
-kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
 
-while (1):
+# Initialize background subtractor
+#fgbg = cv2.BackgroundSubtractorMOG2()
+#kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
+
+
+#############################################
+
+# Select Region of Interest
+# Based on Capturing mouse click events with Python and OpenCV by Adrian Rosebrock
+# http://www.pyimagesearch.com/2015/03/09/capturing-mouse-click-events-with-python-and-opencv/
+
+roi = list()
+
+def selectROI(event, x, y, flags, params):
+    global roi
+    
+    if event == cv2.EVENT_LBUTTONUP:
+        roi.append((x, y))
+        if len(roi) == 2:
+            cv2.rectangle(img, roi[0], roi[1], (255, 0, 0), 2)
+
+
+ret, img = cap.read()
+backup = img.copy()
+cv2.namedWindow("SelectROI")
+cv2.setMouseCallback("SelectROI", selectROI)
+
+while True:
+    cv2.imshow("SelectROI", img)
+    k = cv2.waitKey(10) &0xFF
+
+    if k == ord('z'):
+        img = backup.copy()
+        roi = []
+
+    if k == 27:
+        break
+
+
+
+print roi
+#############################################
+
+# Detect People
+
+while True:
     
     #trainingSetPositive = 'training/positive/'
     #trainingSetNegative = 'training/negative/'
@@ -26,14 +71,17 @@ while (1):
     #print "Positives", positives
     #print "Negatives", negatives
 
-    ret, img = cap.read()
+    try:
+        ret, img = cap.read()
+        img = img[roi[0][1]:roi[1][1], roi[0][0]:roi[1][0]]
+    except:
+        exit(1)
 
     # Background subtraction
     #blur = cv2.GaussianBlur(img, (3,3), 0)
     #fgmask = fgbg.apply(img, None, 0.5)
     #fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
     
-
     #img = cv2.imread(trainingSetPositive+positives[0])
 
     # HOG Descriptor
@@ -61,35 +109,9 @@ while (1):
 
     # Show results
     cv2.imshow("people detector", img)
-    k = cv2.waitKey(30) & 0xff                                                                                                                      
-    if k == 27:                                                                                                                                      
-       break     
-    exit
+    k = cv2.waitKey(10) & 0xff                            
+    if k == 27:                                                                                                                       
+       break
     
-# fgbg = cv2.BackgroundSubtractorMOG2()
-# kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-
-# while(1):
-#     # Get frame
-#     ret, frame = cap.read()
-    
-#     # Gaussian filter
-#     blur = cv2.GaussianBlur(frame, (3,3), 0)
-    
-#     # Apply background subtractor
-#     fgmask = fgbg.apply(blur, None, 0.005)
-    
-#     fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
-
-#     # Show
-#     cv2.imshow('blur', blur)
-#     cv2.imshow('fgmask', fgmask)
-
-#     k = cv2.waitKey(30) & 0xff
-#     if k == 27:
-#         break
-
-
-# cap.release()
-# cv2.destroyAllWindows()
-
+cap.release()
+cv2.destroyAllWindows()
