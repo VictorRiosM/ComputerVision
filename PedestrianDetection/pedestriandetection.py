@@ -12,7 +12,7 @@ colorsfile = imp.load_source('colors', '../cv_laboratorio/colors.py')
 try:
     cap = cv2.VideoCapture(argv[1])
 except:
-    cap = cv2.VideoCapture('/home/victor/TownCentreXVID.avi')
+    cap = cv2.VideoCapture(0)
 
 
 # Initialize background subtractor
@@ -54,14 +54,13 @@ while True:
         break
 
 
-
-print roi
 #############################################
 
 # Detect People
 
 while True:
     
+    # I was planning to train the SVM by myself
     #trainingSetPositive = 'training/positive/'
     #trainingSetNegative = 'training/negative/'
  
@@ -71,25 +70,30 @@ while True:
     #print "Positives", positives
     #print "Negatives", negatives
 
+    ret, img = cap.read()
+    
     try:
-        ret, img = cap.read()
-        img = img[roi[0][1]:roi[1][1], roi[0][0]:roi[1][0]]
+        bigger_img = img[roi[0][1]-64:roi[1][1], roi[0][0]-16:roi[1][0]+16]
+        resized = True
     except:
-        exit(1)
+        bigger_img = img[roi[0][1]:roi[1][1], roi[0][0]:roi[1][0]]
+        resized = False
 
-    # Background subtraction
-    #blur = cv2.GaussianBlur(img, (3,3), 0)
-    #fgmask = fgbg.apply(img, None, 0.5)
-    #fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
+    img = img[roi[0][1]:roi[1][1], roi[0][0]:roi[1][0]]
+
+    # Background subtraction, seems this negatively affects in the detection
+    # blur = cv2.GaussianBlur(img, (3,3), 0)
+    # fgmask = fgbg.apply(img, None, 0.5)
+    # fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
     
     #img = cv2.imread(trainingSetPositive+positives[0])
-
+    
     # HOG Descriptor
     hog = cv2.HOGDescriptor()
     hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+
     hogParams = {'winStride': (0, 0), 'padding': (0, 0), 'scale': 1.05}
-    #found = hog.detect(img)
-    found = hog.detectMultiScale(img, **hogParams);
+    found = hog.detectMultiScale(bigger_img, **hogParams);
     
     noofpersons = len(found[0])
 
@@ -99,10 +103,17 @@ while True:
     # Bounding box
     for i in xrange(0, noofpersons):
         person = found[0][i].tolist()
-        x=person[0]
-        y=person[1]
-        xf=person[0]+person[2]
-        yf=person[1]+person[3]
+        if resized == True:
+            x=person[0]-16
+            y=person[1]-64
+            xf=person[0]+person[2]-16
+            yf=person[1]+person[3]-64
+        else:
+            x=person[0]
+            y=person[1]
+            xf=person[0]+person[2]
+            yf=person[1]+person[3]
+
         cv2.rectangle(img, (x, y), (xf, yf), col[i], 1)
 
     cv2.putText(img, "Number of persons: " + str(noofpersons), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
